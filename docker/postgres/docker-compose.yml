@@ -1,0 +1,25 @@
+version: '3.5'
+
+services:
+
+  psotgres:
+    image: postgres
+    container_name: todo-api-go-postgres
+    restart: always
+    networks:
+      - todo-api-go
+    ports:
+      - "5432:5432"
+    volumes:
+      - todo-api-go-postgres-data:/var/lib/postgresql/data
+      - ./init_todo_db.sql:/docker-entrypoint-initdb.d/init_todo_db.sql
+    environment:
+      POSTGRES_PASSWORD: p455w0rd  # Password to use for the 'postgres' user
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+
+networks:
+  todo-api-go:
+    name: todo-api-go
+
+volumes:
+  todo-api-go-postgres-data:
