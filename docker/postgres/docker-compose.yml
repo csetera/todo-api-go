@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
 
-  psotgres:
+  postgres:
     image: postgres
     container_name: todo-api-go-postgres
     restart: always
