@@ -10,3 +10,15 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Terraform dependencies
+docker/zitadel/terraform/.terraform/
+docker/zitadel/terraform/.terraform.lock.hcl
+docker/zitadel/terraform/terraform.tfstate
+docker/zitadel/terraform/terraform.tfstate.backup
+
+# The terraform token
+docker/zitadel/terraform/admin-key.json
+docker/zitadel/terraform/todo-api-go.json
+docker/zitadel/terraform/readonly_pat.txt
+docker/zitadel/terraform/readwrite_pat.txt
