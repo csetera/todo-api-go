@@ -1,20 +1,50 @@
 package main
 
 import (
+	"context"
+	"flag"
+	"log/slog"
+	"os"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
 	"todo-api-go/api"
 	"todo-api-go/entities"
+	"todo-api-go/oidc"
 	"todo-api-go/persistence"
 
-	"os"
-	"strings"
+	"github.com/zitadel/zitadel-go/v3/pkg/authorization"
+	"github.com/zitadel/zitadel-go/v3/pkg/authorization/oauth"
+	"github.com/zitadel/zitadel-go/v3/pkg/zitadel"
+)
+
+var (
+	// flags to be provided for running the example server
+	domain = flag.String("domain", "", "your ZITADEL instance domain (in the form: <instance>.zitadel.cloud or <yourdomain>)")
+	key    = flag.String("key", "", "path to your key.json")
+	port   = flag.String("port", "8089", "port to run the server on (default is 8089)")
 )
 
 func main() {
+	flag.Parse()
+
+	ctx := context.Background()
+
+	// Initiate the authorization by providing a zitadel configuration and a verifier.
+	// This example will use OAuth2 Introspection for this, therefore you will also need to provide the downloaded api key.json
+	authZ, err := authorization.New(ctx, zitadel.New(*domain, zitadel.WithInsecure("8088")), oauth.DefaultAuthorization(*key))
+	if err != nil {
+		slog.Error("zitadel sdk could not initialize", "error", err)
+		os.Exit(1)
+	}
+
+	// Initialize the HTTP middleware by providing the authorization
+	mw := oidc.New(authZ)
+
 	router := gin.Default()
-	api.RegisterRoutes(router, createEntityManager())
+	api.RegisterRoutes(router, createEntityManager(), mw)
 	router.Run(":8080")
 }
 

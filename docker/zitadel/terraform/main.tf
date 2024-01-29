@@ -6,7 +6,7 @@ terraform {
   required_providers {
     zitadel = {
       source  = "zitadel/zitadel"
-      version = "1.0.5"
+      version = "1.0.6"
     }
   }
 }
@@ -37,22 +37,23 @@ resource "zitadel_project" "default" {
 #
 # Some roles for testing
 #
-resource "zitadel_project_role" "viewer" {
-  org_id       = zitadel_org.default.id
-  project_id   = zitadel_project.default.id
-  role_key     = "viewer"
-  display_name = "Read-only viewer"
+variable "roles" {
+  description = "Roles for testing"
+  type        = list(string)
+  default     = ["create", "retrieve", "update", "delete"]
 }
 
-resource "zitadel_project_role" "editor" {
+resource "zitadel_project_role" "name" {
+  count = length(var.roles)
+
   org_id       = zitadel_org.default.id
   project_id   = zitadel_project.default.id
-  role_key     = "editor"
-  display_name = "Read-write user"
+  role_key = var.roles[count.index]
+  display_name = var.roles[count.index]
 }
 
 #
-# Machine users with different roles
+# Machine users with private access tokens
 #
 resource "zitadel_machine_user" "readonly" {
   org_id      = zitadel_org.default.id

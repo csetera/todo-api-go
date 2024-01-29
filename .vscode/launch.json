@@ -10,6 +10,12 @@
             "request": "launch",
             "mode": "auto",
             "program": "main/main.go",
+            "args": [
+                "--domain",
+                "localhost",
+                "--key",
+                "${workspaceFolder}/docker/zitadel/terraform/todo-api-go.json"
+            ],
             "env": {
                 "DB_TYPE": "postgres",
                 "DB_DSN": "host={{.Host}} port={{.Port}} dbname={{.Database}} user={{.User}} password={{.Pass}} sslmode=disable",

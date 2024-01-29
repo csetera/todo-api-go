@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"todo-api-go/entities"
+	"todo-api-go/oidc"
 	"todo-api-go/persistence"
 )
 
@@ -24,11 +25,11 @@ type FindResponse struct {
 // gin: The Gin engine to register the routes with.
 // mgr: The ToDo entity manager.
 // Returns the registered Gin engine.
-func RegisterRoutes(gin *gin.Engine, mgr *persistence.ToDoEntityManager) *gin.Engine {
-	gin.DELETE("/api/todo/:id", deleteToDoItemHandler(mgr))
-	gin.GET("/api/todo", getAllToDoItemsHandler(mgr))
-	gin.GET("/api/todo/:id", getToDoByIdHandler(mgr))
-	gin.POST("/api/todo", createToDoItemHandler(mgr))
+func RegisterRoutes(gin *gin.Engine, mgr *persistence.ToDoEntityManager, mw *oidc.OIDCMiddleware) *gin.Engine {
+	gin.DELETE("/api/todo/:id", mw.RequiresRole("delete"), deleteToDoItemHandler(mgr))
+	gin.GET("/api/todo", mw.RequiresRole("retrieve"), getAllToDoItemsHandler(mgr))
+	gin.GET("/api/todo/:id", mw.RequiresRole("retreive"), getToDoByIdHandler(mgr))
+	gin.POST("/api/todo", mw.RequiresRole("create"), createToDoItemHandler(mgr))
 
 	return gin
 }
