@@ -24,6 +24,7 @@ require (
 require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/stretchr/testify v1.8.4
 	gorm.io/driver/mysql v1.5.2

@@ -18,6 +18,15 @@ import (
 	"testing"
 )
 
+type MockAuthorizer struct {
+}
+
+func (mock *MockAuthorizer) RequiresRole(role string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+	}
+}
+
 func TestCreate(t *testing.T) {
 	assert := assert.New(t)
 
@@ -106,8 +115,10 @@ func TestGetByID(t *testing.T) {
 }
 
 func makeRequest(mgr *persistence.ToDoEntityManager, request *http.Request) *httptest.ResponseRecorder {
+	var mock MockAuthorizer
+
 	router := gin.Default()
-	api.RegisterRoutes(router, mgr)
+	api.RegisterRoutes(router, mgr, &mock)
 
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)

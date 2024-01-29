@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/zitadel/zitadel-go/v3 v3.0.0-next.2
 )
 

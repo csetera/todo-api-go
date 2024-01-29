@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"todo-api-go/entities"
-	"todo-api-go/oidc"
 	"todo-api-go/persistence"
 )
 
@@ -20,16 +19,20 @@ type FindResponse struct {
 	Data []entities.ToDoItemEntity
 }
 
+type AuthorizerFactory interface {
+	RequiresRole(role string) gin.HandlerFunc
+}
+
 // RegisterRoutes registers the ToDo API routes for the Gin engine.
 //
 // gin: The Gin engine to register the routes with.
 // mgr: The ToDo entity manager.
 // Returns the registered Gin engine.
-func RegisterRoutes(gin *gin.Engine, mgr *persistence.ToDoEntityManager, mw *oidc.OIDCMiddleware) *gin.Engine {
-	gin.DELETE("/api/todo/:id", mw.RequiresRole("delete"), deleteToDoItemHandler(mgr))
-	gin.GET("/api/todo", mw.RequiresRole("retrieve"), getAllToDoItemsHandler(mgr))
-	gin.GET("/api/todo/:id", mw.RequiresRole("retreive"), getToDoByIdHandler(mgr))
-	gin.POST("/api/todo", mw.RequiresRole("create"), createToDoItemHandler(mgr))
+func RegisterRoutes(gin *gin.Engine, mgr *persistence.ToDoEntityManager, authFactory AuthorizerFactory) *gin.Engine {
+	gin.DELETE("/api/todo/:id", authFactory.RequiresRole("delete"), deleteToDoItemHandler(mgr))
+	gin.GET("/api/todo", authFactory.RequiresRole("retrieve"), getAllToDoItemsHandler(mgr))
+	gin.GET("/api/todo/:id", authFactory.RequiresRole("retreive"), getToDoByIdHandler(mgr))
+	gin.POST("/api/todo", authFactory.RequiresRole("create"), createToDoItemHandler(mgr))
 
 	return gin
 }
