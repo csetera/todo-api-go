@@ -6,7 +6,7 @@ terraform {
   required_providers {
     zitadel = {
       source  = "zitadel/zitadel"
-      version = "1.0.6"
+      version = "1.0.7"
     }
   }
 }
@@ -82,6 +82,43 @@ resource "zitadel_personal_access_token" "readwrite" {
 }
 
 #
+# Human Users
+#
+resource "zitadel_human_user" "readonly" {
+  org_id             = zitadel_org.default.id
+  user_name          = "readonly@localhost.com"
+  first_name         = "Read"
+  last_name          = "Only"
+  email              = "readonly@localhost.com"
+  is_email_verified  = true
+  initial_password   = "P455w0rd!"
+}
+
+resource "zitadel_user_grant" "readonly" {
+  project_id = zitadel_project.default.id
+  org_id     = zitadel_org.default.id
+  user_id    = zitadel_human_user.readonly.id
+  role_keys  = ["retrieve"]
+}
+
+resource "zitadel_human_user" "readwrite" {
+  org_id             = zitadel_org.default.id
+  user_name          = "readwrite@localhost.com"
+  first_name         = "Read"
+  last_name          = "Write"
+  email              = "readwrite@localhost.com"
+  is_email_verified  = true
+  initial_password   = "P455w0rd!"
+}
+
+resource "zitadel_user_grant" "readwrite" {
+  project_id = zitadel_project.default.id
+  org_id     = zitadel_org.default.id
+  user_id    = zitadel_human_user.readwrite.id
+  role_keys  = ["create", "retrieve", "update", "delete"]
+}
+
+#
 # API Application Setup
 #
 resource "zitadel_application_api" "default" {
@@ -97,6 +134,26 @@ resource "zitadel_application_key" "default" {
   app_id          = zitadel_application_api.default.id
   key_type        = "KEY_TYPE_JSON"
   expiration_date = "2519-04-01T08:45:00Z"
+}
+
+#
+# OIDC Application Setup
+#
+resource "zitadel_application_oidc" "default" {
+  org_id     = zitadel_org.default.id
+  project_id = zitadel_project.default.id
+
+  name                        = "todo-api-go-oidc"
+  app_type                    = "OIDC_APP_TYPE_USER_AGENT"
+  grant_types                 = ["OIDC_GRANT_TYPE_AUTHORIZATION_CODE", "OIDC_GRANT_TYPE_REFRESH_TOKEN"]
+  response_types              = ["OIDC_RESPONSE_TYPE_CODE"]
+  dev_mode                    = true
+  redirect_uris               = ["http://localhost", "http://localhost:28080" ]
+  post_logout_redirect_uris   = ["http://localhost", "http://localhost:28080" ]
+  auth_method_type            = "OIDC_AUTH_METHOD_TYPE_NONE"
+  access_token_role_assertion = true
+  id_token_role_assertion     = true
+  id_token_userinfo_assertion = true
 }
 
 #
@@ -123,6 +180,12 @@ output "application_api_key" {
   sensitive = true
 }
 
+output "oidc_app_client_id" {
+  value = zitadel_application_oidc.default.client_id
+  description = "The client identifier of the OIDC application"
+  sensitive = true
+}
+
 output "readonly_pat" {
   value         = zitadel_personal_access_token.readonly.token
   description   = "The Bearer token value for the read-only user"
@@ -142,6 +205,7 @@ output "readwrite_pat" {
 
 #
 # Retrieve the API Key as JSON using
+# tofu output -raw oidc_app_client_id
 # tofu output -raw application_api_key > todo-api-go-key.json
 # tofu output -raw readonly_pat > readonly_pat.txt
 # tofu output -raw readwrite_pat > readwrite_pat.txt

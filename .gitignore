@@ -23,3 +23,4 @@ docker/zitadel/terraform/admin-key.json
 docker/zitadel/terraform/todo-api-go.json
 docker/zitadel/terraform/readonly_pat.txt
 docker/zitadel/terraform/readwrite_pat.txt
+docker/zitadel/terraform/todo-api-go-key.json

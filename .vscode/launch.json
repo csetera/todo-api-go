@@ -21,7 +21,7 @@
                 "DB_AUTO_MIGRATE": "false",
 
                 "ZITADEL_DOMAIN": "localhost",
-                "ZITADEL_KEY": "${workspaceFolder}/docker/zitadel/terraform/todo-api-go.json",
+                "ZITADEL_KEY": "${workspaceFolder}/docker/zitadel/terraform/todo-api-go-key.json",
                 "ZITADEL_PORT": "8088",
                 "ZITADEL_INSECURE": "true"
             }
