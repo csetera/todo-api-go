@@ -1,23 +1,40 @@
 package persistence
 
 import (
+	"bytes"
+	"errors"
+	"strings"
+	"text/template"
+
+	"github.com/kelseyhightower/envconfig"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-
-	"bytes"
-	"os"
-	"strings"
-	"text/template"
 )
 
 type DBParameters struct {
-	Host     string
-	Port     string
-	Database string
-	User     string
-	Pass     string
+	// One of "sqlite", "mysql", "postgres"
+	Type string `required:"true"`
+
+	// Text template for use in building the complete DSN
+	Dsn      string `required:"true"`
+	Host     string `required:"true"`
+	Port     int    `required:"true"`
+	Database string `required:"true"`
+	User     string `required:"true"`
+	Pass     string `required:"true"`
+}
+
+// GetParametersFromEnv retrieves the DBParameters from environment variables.
+//
+// Returns *DBParameters and error.
+func GetParametersFromEnv() (*DBParameters, error) {
+	var params DBParameters
+	err := envconfig.Process("db", &params)
+
+	return &params, err
 }
 
 // OpenDialectorFromEnv returns a gorm.Dialector based on the values of the "DB_***" environment variables.
@@ -27,18 +44,15 @@ type DBParameters struct {
 //
 // It panics if either "DB_TYPE" or "DB_DSN" environment variables are not configured.
 // It returns a gorm.Dialector based on the provided "DB_TYPE" and "DB_DSN".
-func OpenDialectorFromEnv() gorm.Dialector {
-	dbType, dbTypeFound := os.LookupEnv("DB_TYPE")
-	if !dbTypeFound {
-		panic("DB_TYPE environment variable not configured")
+func OpenDialectorFromEnv() (gorm.Dialector, error) {
+	var params DBParameters
+
+	err := envconfig.Process("db", &params)
+	if err != nil {
+		return nil, err
 	}
 
-	dsnTemplate, dsnTemplateFound := os.LookupEnv("DB_DSN")
-	if !dsnTemplateFound {
-		panic("DB_DSN environment variable not configured")
-	}
-
-	return OpenDialector(dbType, dsnTemplate)
+	return OpenDialector(&params)
 }
 
 // OpenDialector creates a GORM dialector based on the given database type and DSN template.
@@ -49,18 +63,23 @@ func OpenDialectorFromEnv() gorm.Dialector {
 //
 // Returns:
 // - gorm.Dialector: The GORM dialector based on the given parameters.
-func OpenDialector(dbType string, dsnTemplate string) gorm.Dialector {
+func OpenDialector(params *DBParameters) (gorm.Dialector, error) {
 
-	switch strings.ToUpper(dbType) {
-	case "SQLITE":
-		return sqlite.Open(makeDSN(dsnTemplate))
-	case "POSTGRES":
-		return postgres.Open(makeDSN(dsnTemplate))
-	case "MYSQL":
-		return mysql.Open(makeDSN(dsnTemplate))
+	dsn, err := makeDSN(params)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	switch strings.ToUpper(params.Type) {
+	case "SQLITE":
+		return sqlite.Open(dsn), nil
+	case "POSTGRES":
+		return postgres.Open(dsn), nil
+	case "MYSQL":
+		return mysql.Open(dsn), nil
+	}
+
+	return nil, errors.New("unknown database type")
 }
 
 // makeDSN generates a Data Source Name (DSN) using a template string.
@@ -70,19 +89,12 @@ func OpenDialector(dbType string, dsnTemplate string) gorm.Dialector {
 // The parsed template is then executed using a DBParameters struct to populate the template variables
 // with the values from the environment variables.
 // The function assumes that the necessary environment variables for the DBParameters are set.
-func makeDSN(dsnTemplate string) string {
+func makeDSN(params *DBParameters) (string, error) {
 	tmpl := template.New("dsn")
-	tmpl, err := tmpl.Parse(dsnTemplate)
-	if err != nil {
-		panic(err)
-	}
 
-	params := DBParameters{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		Database: os.Getenv("DB_DATABASE"),
-		User:     os.Getenv("DB_USER"),
-		Pass:     os.Getenv("DB_PASS"),
+	tmpl, err := tmpl.Parse(params.Dsn)
+	if err != nil {
+		return "", err
 	}
 
 	var doc bytes.Buffer
@@ -91,5 +103,5 @@ func makeDSN(dsnTemplate string) string {
 		panic(err)
 	}
 
-	return doc.String()
+	return doc.String(), nil
 }

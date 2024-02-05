@@ -1,20 +1,28 @@
 package main
 
 import (
+	"log"
+	"os"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
 	"todo-api-go/api"
 	"todo-api-go/entities"
+	"todo-api-go/oidc"
 	"todo-api-go/persistence"
-
-	"os"
-	"strings"
 )
 
 func main() {
+	// Initialize the HTTP middleware for authorization
+	authz, err := oidc.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	router := gin.Default()
-	api.RegisterRoutes(router, createEntityManager())
+	api.RegisterRoutes(router, createEntityManager(), authz)
 	router.Run(":8080")
 }
 
@@ -28,19 +36,22 @@ func main() {
 // Returns:
 // *persistence.ToDoEntityManager - The newly created instance of ToDoEntityManager.
 func createEntityManager() *persistence.ToDoEntityManager {
-	dialector := persistence.OpenDialectorFromEnv()
+	dialector, err := persistence.OpenDialectorFromEnv()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db, err := gorm.Open(dialector, &gorm.Config{
 		PrepareStmt: true,
 	})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if strings.ToLower(os.Getenv("DB_AUTO_MIGRATE")) == "true" {
 		err = db.AutoMigrate(&entities.ToDoItemEntity{})
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 

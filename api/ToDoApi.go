@@ -19,16 +19,20 @@ type FindResponse struct {
 	Data []entities.ToDoItemEntity
 }
 
+type AuthorizerFactory interface {
+	RequiresRole(role string) gin.HandlerFunc
+}
+
 // RegisterRoutes registers the ToDo API routes for the Gin engine.
 //
 // gin: The Gin engine to register the routes with.
 // mgr: The ToDo entity manager.
 // Returns the registered Gin engine.
-func RegisterRoutes(gin *gin.Engine, mgr *persistence.ToDoEntityManager) *gin.Engine {
-	gin.DELETE("/api/todo/:id", deleteToDoItemHandler(mgr))
-	gin.GET("/api/todo", getAllToDoItemsHandler(mgr))
-	gin.GET("/api/todo/:id", getToDoByIdHandler(mgr))
-	gin.POST("/api/todo", createToDoItemHandler(mgr))
+func RegisterRoutes(gin *gin.Engine, mgr *persistence.ToDoEntityManager, authFactory AuthorizerFactory) *gin.Engine {
+	gin.DELETE("/api/todo/:id", authFactory.RequiresRole("delete"), deleteToDoItemHandler(mgr))
+	gin.GET("/api/todo", authFactory.RequiresRole("retrieve"), getAllToDoItemsHandler(mgr))
+	gin.GET("/api/todo/:id", authFactory.RequiresRole("retreive"), getToDoByIdHandler(mgr))
+	gin.POST("/api/todo", authFactory.RequiresRole("create"), createToDoItemHandler(mgr))
 
 	return gin
 }
