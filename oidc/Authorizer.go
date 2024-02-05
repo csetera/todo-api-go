@@ -29,6 +29,9 @@ type Authorizer struct {
 	zitadelAuthorizer *authorization.Authorizer[*oauth.IntrospectionContext]
 }
 
+// New initializes the Authorizer with a zitadel configuration and a verifier.
+//
+// Returns a pointer to Authorizer and an error.
 func New() (*Authorizer, error) {
 	ctx := context.Background()
 
@@ -56,6 +59,9 @@ func New() (*Authorizer, error) {
 	}, nil
 }
 
+// RequiresRole returns a gin.HandlerFunc that checks if the user has the specified role.
+//
+// It takes a role string as a parameter and returns a gin.HandlerFunc.
 func (authz *Authorizer) RequiresRole(role string) gin.HandlerFunc {
 	check := authorization.WithRole(role)
 
