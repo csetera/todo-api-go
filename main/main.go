@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -22,23 +22,29 @@ func main() {
 	// Initialize the OpenTelemetry SDK
 	otelShutdown, err := telemetry.SetupOTelSDK(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		fatalError(err)
 	}
-	// Handle shutdown properly so nothing leaks.
+
+	// Handle Otel shutdown properly so nothing leaks
 	defer func() {
 		err = errors.Join(err, otelShutdown(context.Background()))
 	}()
 
 	// Initialize the HTTP middleware for authorization
+	slog.Info("Initializing HTTP middleware for authorization")
 	authz, err := oidc.New()
 	if err != nil {
-		log.Fatal(err)
+		fatalError(err)
 	}
 
+	// Register the routes
+	slog.Info("Registering routes")
 	router := gin.Default()
 	router.Use(otelgin.Middleware("todo-api-go"))
 	api.RegisterRoutes(router, createEntityManager(), authz)
 
+	// Start the server
+	slog.Info("Starting server")
 	router.Run(":8080")
 }
 
@@ -54,22 +60,31 @@ func main() {
 func createEntityManager() *persistence.ToDoEntityManager {
 	dialector, err := persistence.OpenDialectorFromEnv()
 	if err != nil {
-		log.Fatal(err)
+		fatalError(err)
 	}
 
 	db, err := gorm.Open(dialector, &gorm.Config{
 		PrepareStmt: true,
 	})
 	if err != nil {
-		log.Fatal(err)
+		fatalError(err)
 	}
 
 	if strings.ToLower(os.Getenv("DB_AUTO_MIGRATE")) == "true" {
 		err = db.AutoMigrate(&entities.ToDoItemEntity{})
 		if err != nil {
-			log.Fatal(err)
+			fatalError(err)
 		}
 	}
 
 	return persistence.New(db)
+}
+
+// Log a fatal error message and exits the program.
+//
+// It takes an error as a parameter and logs the error message using the slog.Error function.
+// It then exits the program with a status code of 1 using os.Exit.
+func fatalError(err error) {
+	slog.Error(err.Error(), err)
+	os.Exit(1)
 }

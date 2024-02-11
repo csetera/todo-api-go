@@ -1,3 +1,7 @@
+github.com/agoda-com/opentelemetry-go/otelslog v0.1.1 h1:6nV8PZCzySHuh9kP/HZ2OJqGucwQiM+yZRugKDvtzj4=
+github.com/agoda-com/opentelemetry-go/otelslog v0.1.1/go.mod h1:CSc0veIcY/HsIfH7l5PGtIpRvBttk09QUQlweVkD2PI=
+github.com/agoda-com/opentelemetry-logs-go v0.4.3 h1:dYAx/q9di+/Pv6HuGq59DFIOjqKT0LTy3PYTIz8ccq8=
+github.com/agoda-com/opentelemetry-logs-go v0.4.3/go.mod h1:gPQ0fHqroxNP2DlQFZt29/pfqGiP2m6Q5CCxEgLo6yQ=
 github.com/cenkalti/backoff/v4 v4.2.1 h1:y4OZtCnogmCPw98Zjyt5a6+QwPLGkiQsYW5oUqylYbM=
 github.com/cenkalti/backoff/v4 v4.2.1/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -44,6 +48,7 @@ go.opentelemetry.io/proto/otlp v1.1.0/go.mod h1:GpBHCBWiqvVLDqmHZsoMM3C5ySeKTC7e
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
 golang.org/x/net v0.20.0 h1:aCL9BSgETF1k+blQaYUBx9hJ9LOGP3gAVemcZlf1Kpo=
+golang.org/x/net v0.20.0/go.mod h1:z8BVo6PvndSri0LbOE3hAn0apkU+1YvI6E70E9jsnvY=
 golang.org/x/sys v0.16.0 h1:xWw16ngr6ZMtmxDyKyIgsE93KNKz5HKmMa3b8ALHidU=
 golang.org/x/sys v0.16.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/text v0.14.0 h1:ScX5w1eTa3QqT8oi6+ziP7dTV1S2+ALU0bI+0zXKWiQ=

@@ -3,7 +3,13 @@ package telemetry
 import (
 	"context"
 	"errors"
+	"log/slog"
+	"os"
 	"time"
+
+	"github.com/agoda-com/opentelemetry-go/otelslog"
+	"github.com/agoda-com/opentelemetry-logs-go/exporters/otlp/otlplogs"
+	logssdk "github.com/agoda-com/opentelemetry-logs-go/sdk/logs"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
@@ -40,21 +46,28 @@ func SetupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		err = errors.Join(inErr, shutdown(ctx))
 	}
 
+	// Some common variables
+	backgroundCtx := context.Background()
+	resource := newResource(backgroundCtx)
+
 	// Set up propagator.
 	prop := newPropagator()
 	otel.SetTextMapPropagator(prop)
 
-	// Set up trace provider.
-	tracerProvider, err := newTraceProvider()
+	// Set up logger.
+	loggerProvider, err := newLoggerProvider(backgroundCtx, resource)
 	if err != nil {
 		handleErr(err)
 		return
 	}
-	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
-	otel.SetTracerProvider(tracerProvider)
+	shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
+
+	// Wire up logger to OpenTelemetry
+	otelLogger := slog.New(otelslog.NewOtelHandler(loggerProvider, &otelslog.HandlerOptions{}))
+	slog.SetDefault(otelLogger)
 
 	// Set up meter provider.
-	meterProvider, err := newMeterProvider()
+	meterProvider, err := newMeterProvider(backgroundCtx)
 	if err != nil {
 		handleErr(err)
 		return
@@ -62,7 +75,26 @@ func SetupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 	shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
 	otel.SetMeterProvider(meterProvider)
 
+	// Set up trace provider.
+	tracerProvider, err := newTraceProvider(backgroundCtx, resource)
+	if err != nil {
+		handleErr(err)
+		return
+	}
+	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
+	otel.SetTracerProvider(tracerProvider)
+
 	return
+}
+
+func newLoggerProvider(ctx context.Context, resource *resource.Resource) (*logssdk.LoggerProvider, error) {
+	logExporter, _ := otlplogs.NewExporter(ctx)
+	loggerProvider := logssdk.NewLoggerProvider(
+		logssdk.WithBatcher(logExporter),
+		logssdk.WithResource(resource),
+	)
+
+	return loggerProvider, nil
 }
 
 // Create a new TextMapPropagator.
@@ -76,24 +108,25 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-// Create a new trace.TracerProvider and an error.
-//
-// No parameters.
-// Returns a *trace.TracerProvider and an error.
-func newTraceProvider() (*trace.TracerProvider, error) {
-	ctx := context.Background()
-
-	res, err := resource.New(ctx,
+func newResource(ctx context.Context) *resource.Resource {
+	hostName, _ := os.Hostname()
+	res, _ := resource.New(ctx,
 		resource.WithAttributes(
 			// the service name used to display traces in backends
 			semconv.ServiceName("todo-api-go"),
 			semconv.ServiceVersion("v1.0.0"),
+			semconv.HostName(hostName),
 		),
 	)
-	if err != nil {
-		return nil, err
-	}
 
+	return res
+}
+
+// Create a new trace.TracerProvider and an error.
+//
+// No parameters.
+// Returns a *trace.TracerProvider and an error.
+func newTraceProvider(ctx context.Context, resource *resource.Resource) (*trace.TracerProvider, error) {
 	stdoutTraceExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
 		return nil, err
@@ -105,7 +138,7 @@ func newTraceProvider() (*trace.TracerProvider, error) {
 	}
 
 	traceProvider := trace.NewTracerProvider(
-		trace.WithResource(res),
+		trace.WithResource(resource),
 
 		trace.WithBatcher(stdoutTraceExporter,
 			// Default is 5s. Set to 1s for demonstrative purposes.
@@ -123,13 +156,13 @@ func newTraceProvider() (*trace.TracerProvider, error) {
 //
 // No parameters.
 // Returns a *metric.MeterProvider and an error.
-func newMeterProvider() (*metric.MeterProvider, error) {
+func newMeterProvider(ctx context.Context) (*metric.MeterProvider, error) {
 	stdoutMetricExporter, err := stdoutmetric.New()
 	if err != nil {
 		return nil, err
 	}
 
-	otlpMetricExporter, err := otlpmetricgrpc.New(context.Background())
+	otlpMetricExporter, err := otlpmetricgrpc.New(ctx)
 	if err != nil {
 		return nil, err
 	}

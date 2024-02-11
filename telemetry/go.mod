@@ -24,6 +24,8 @@ require (
 )
 
 require (
+	github.com/agoda-com/opentelemetry-go/otelslog v0.1.1
+	github.com/agoda-com/opentelemetry-logs-go v0.4.3
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.23.1

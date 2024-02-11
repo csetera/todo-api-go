@@ -1,7 +1,12 @@
 package api_test
 
 import (
+	"bytes"
 	"encoding/json"
+	"testing"
+
+	"net/http"
+	"net/http/httptest"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -10,12 +15,6 @@ import (
 	"todo-api-go/entities"
 	"todo-api-go/persistence"
 	"todo-api-go/testsupport"
-
-	"net/http"
-	"net/http/httptest"
-
-	"bytes"
-	"testing"
 )
 
 type MockAuthorizer struct {
