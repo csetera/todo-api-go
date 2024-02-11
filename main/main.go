@@ -1,20 +1,34 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"gorm.io/gorm"
 
 	"todo-api-go/api"
 	"todo-api-go/entities"
 	"todo-api-go/oidc"
 	"todo-api-go/persistence"
+	"todo-api-go/telemetry"
 )
 
 func main() {
+	// Initialize the OpenTelemetry SDK
+	otelShutdown, err := telemetry.SetupOTelSDK(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errors.Join(err, otelShutdown(context.Background()))
+	}()
+
 	// Initialize the HTTP middleware for authorization
 	authz, err := oidc.New()
 	if err != nil {
@@ -22,7 +36,9 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.Use(otelgin.Middleware("todo-api-go"))
 	api.RegisterRoutes(router, createEntityManager(), authz)
+
 	router.Run(":8080")
 }
 

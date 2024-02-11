@@ -23,7 +23,9 @@
                 "ZITADEL_DOMAIN": "localhost",
                 "ZITADEL_KEY": "${workspaceFolder}/docker/zitadel/terraform/todo-api-go-key.json",
                 "ZITADEL_PORT": "8088",
-                "ZITADEL_INSECURE": "true"
+                "ZITADEL_INSECURE": "true",
+
+                "OTEL_EXPORTER_OTLP_INSECURE": "true",
             }
         }
     ]

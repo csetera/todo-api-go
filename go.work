@@ -6,5 +6,6 @@ use (
 	./main
 	./oidc
 	./persistence
+	./telemetry
 	./testsupport
 )
