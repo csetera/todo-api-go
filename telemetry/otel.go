@@ -87,6 +87,12 @@ func SetupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 	return
 }
 
+// Creates a new OenTelemetry logger provider in Go.
+// NOTE: No official logger provider exists in OpenTelemetry,
+// so using a temporary implemementation.
+//
+// ctx context.Context, resource *resource.Resource
+// *logssdk.LoggerProvider, error
 func newLoggerProvider(ctx context.Context, resource *resource.Resource) (*logssdk.LoggerProvider, error) {
 	logExporter, _ := otlplogs.NewExporter(ctx)
 	loggerProvider := logssdk.NewLoggerProvider(
@@ -108,6 +114,10 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
+// Creates a new OpenTelemetry resource that represents this service.
+//
+// ctx context.Context
+// *resource.Resource
 func newResource(ctx context.Context) *resource.Resource {
 	hostName, _ := os.Hostname()
 	res, _ := resource.New(ctx,
