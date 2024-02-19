@@ -41,15 +41,11 @@ func main() {
 
 	// Initialize the database connectivity
 	entityManager := createEntityManager()
-	// gormTrace := func(ctx *gin.Context) {
-	// 	entityManager.ORM().WithContext(ctx.Request.Context())
-	// 	ctx.Next()
-	// }
 
 	// Register the routes
 	slog.Info("Registering routes")
 	router := gin.Default()
-	router.Use(otelgin.Middleware("todo-api-go")) //, gormTrace)
+	router.Use(otelgin.Middleware("todo-api-go"))
 	api.RegisterRoutes(router, entityManager, authz)
 
 	// Start the server

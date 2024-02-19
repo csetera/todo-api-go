@@ -82,10 +82,10 @@ func (mgr *ToDoEntityManager) FineOne(id int) (*entities.ToDoItemEntity, error) 
 	return &item, nil
 }
 
-// func (mgr *ToDoEntityManager) ORM() *gorm.DB {
-// 	return mgr.orm
-// }
-
+// WithContext returns a new ToDoEntityManager with the provided context.
+//
+// ctx context.Context
+// *ToDoEntityManager
 func (mgr *ToDoEntityManager) WithContext(ctx context.Context) *ToDoEntityManager {
 	return &ToDoEntityManager{orm: mgr.orm.WithContext(ctx)}
 }
