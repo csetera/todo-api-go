@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 
 	"todo-api-go/entities"
@@ -78,6 +80,14 @@ func (mgr *ToDoEntityManager) FineOne(id int) (*entities.ToDoItemEntity, error) 
 	}
 
 	return &item, nil
+}
+
+// func (mgr *ToDoEntityManager) ORM() *gorm.DB {
+// 	return mgr.orm
+// }
+
+func (mgr *ToDoEntityManager) WithContext(ctx context.Context) *ToDoEntityManager {
+	return &ToDoEntityManager{orm: mgr.orm.WithContext(ctx)}
 }
 
 // New creates a new instance of ToDoEntityManager.

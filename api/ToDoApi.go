@@ -50,7 +50,7 @@ func createToDoItemHandler(manager *persistence.ToDoEntityManager) gin.HandlerFu
 			return
 		}
 
-		err = manager.Create(&item)
+		err = manager.WithContext(c.Request.Context()).Create(&item)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -75,7 +75,7 @@ func deleteToDoItemHandler(manager *persistence.ToDoEntityManager) gin.HandlerFu
 			return
 		}
 
-		err = manager.Delete(uint(id))
+		err = manager.WithContext(c.Request.Context()).Delete(uint(id))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -92,7 +92,7 @@ func deleteToDoItemHandler(manager *persistence.ToDoEntityManager) gin.HandlerFu
 // The function returns a gin.HandlerFunc.
 func getAllToDoItemsHandler(manager *persistence.ToDoEntityManager) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
-		items, total, err := manager.FindAll(getPagingConfigurator(c))
+		items, total, err := manager.WithContext(c.Request.Context()).FindAll(getPagingConfigurator(c))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -142,7 +142,7 @@ func getToDoByIdHandler(manager *persistence.ToDoEntityManager) gin.HandlerFunc 
 			return
 		}
 
-		todo, err := manager.FineOne(id)
+		todo, err := manager.WithContext(c.Request.Context()).FineOne(id)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

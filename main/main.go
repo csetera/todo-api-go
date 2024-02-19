@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
+
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"gorm.io/gorm"
 
@@ -37,11 +39,18 @@ func main() {
 		fatalError(err)
 	}
 
+	// Initialize the database connectivity
+	entityManager := createEntityManager()
+	// gormTrace := func(ctx *gin.Context) {
+	// 	entityManager.ORM().WithContext(ctx.Request.Context())
+	// 	ctx.Next()
+	// }
+
 	// Register the routes
 	slog.Info("Registering routes")
 	router := gin.Default()
-	router.Use(otelgin.Middleware("todo-api-go"))
-	api.RegisterRoutes(router, createEntityManager(), authz)
+	router.Use(otelgin.Middleware("todo-api-go")) //, gormTrace)
+	api.RegisterRoutes(router, entityManager, authz)
 
 	// Start the server
 	slog.Info("Starting server")
@@ -66,6 +75,11 @@ func createEntityManager() *persistence.ToDoEntityManager {
 	db, err := gorm.Open(dialector, &gorm.Config{
 		PrepareStmt: true,
 	})
+	if err != nil {
+		fatalError(err)
+	}
+
+	err = db.Use(otelgorm.NewPlugin(otelgorm.WithDBName("todo-api-go")))
 	if err != nil {
 		fatalError(err)
 	}
