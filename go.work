@@ -1,11 +1,11 @@
 go 1.21.6
 
 use (
-	./api
-	./entities
-	./main
-	./oidc
-	./persistence
-	./telemetry
-	./testsupport
+	./cmd
+	./internal/api
+	./internal/entities
+	./internal/oidc
+	./internal/persistence
+	./internal/telemetry
+	./internal/testsupport
 )

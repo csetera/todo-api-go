@@ -1,1 +1,0 @@
-Simple test harness for retrieving an OIDC token using the [Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636) OIDC flow.

@@ -1,0 +1,25 @@
+# This file is maintained automatically by "tofu init".
+# Manual edits may be lost in future updates.
+
+provider "registry.opentofu.org/zitadel/zitadel" {
+  version     = "1.0.7"
+  constraints = "1.0.7"
+  hashes = [
+    "h1:exKwdFs6rxwlJH/Px2e27cq43FNeT9/BkA1qC5KlSYo=",
+    "zh:0519f5be67fa88ad91eb6343989530559a4a95980c08370a12b432a6073990a1",
+    "zh:0d3d6605de2f122ea224fb17c6b48c87770ef8cb68b0e88ddb2bc3122160156f",
+    "zh:1711057f556d3c7fc68ef2a64953358bd34331691ea242786af7695513bc90c4",
+    "zh:280e863b537b22243aa739694ce33fa7cfab8195bd4f9262a75480d54f843448",
+    "zh:38f760b452a974b80da2c30369117db56f934b14664d6f39f3f255702c779417",
+    "zh:45cd853f129651c5ed59d04ffda3aa276e9829aabe5a2849b7cee240f2dd357c",
+    "zh:469cecad7adab80314a4d5988e891c56ac6023514f0d59c7e29d4acebacdadf7",
+    "zh:49a2d7d306cc6a4d9c4d480e4888eb109f715ed872f85b6107a6efac63d9de28",
+    "zh:5c6185d50dfe42a35647321089d49d9eb4861c17cd17743821f2bf955fc3c9ec",
+    "zh:5e34c46b200a96369140c227c2a3d3c60613e86d53bf0058c4ff7bb3e63f237c",
+    "zh:71518dcfa1d5afddc7e3a0460c6a391b3c59da0f6f54d2fa10ee491b679024f2",
+    "zh:88c66aadc04f839142d06946f275b2beab3b96216f95e1f034e800fedf6cee43",
+    "zh:a33d53acc640dc93b81352ba633cf392bc8c7614a72d320d59d3dcdb22d73fc4",
+    "zh:a91aab524b4ddfed6c550d8a76022f4e560f72732153e66e2ed5cb5bf3df8896",
+    "zh:c094da974a3a1059f6a8e100f5fc2106a550f7a3aa83e06fb6e9d749544cf56e",
+  ]
+}
