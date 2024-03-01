@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-main/main
+cmd/main
 
 # Test binary, built with `go test -c`
 *.test
@@ -13,14 +13,14 @@ main/main
 *.out
 
 # Terraform dependencies
-docker/zitadel/terraform/.terraform/
-docker/zitadel/terraform/.terraform.lock.hcl
-docker/zitadel/terraform/terraform.tfstate
-docker/zitadel/terraform/terraform.tfstate.backup
+deployments/docker/zitadel/terraform/.terraform/
+deployments/docker/zitadel/terraform/.terraform.lock.hcl
+deployments/docker/zitadel/terraform/terraform.tfstate
+deployments/docker/zitadel/terraform/terraform.tfstate.backup
 
-# The terraform token
-docker/zitadel/terraform/admin-key.json
-docker/zitadel/terraform/todo-api-go.json
-docker/zitadel/terraform/readonly_pat.txt
-docker/zitadel/terraform/readwrite_pat.txt
-docker/zitadel/terraform/todo-api-go-key.json
+# The terraform auth data
+deployments/docker/zitadel/terraform/admin-key.json
+deployments/docker/zitadel/terraform/todo-api-go.json
+deployments/docker/zitadel/terraform/readonly_pat.txt
+deployments/docker/zitadel/terraform/readwrite_pat.txt
+deployments/docker/zitadel/terraform/todo-api-go-key.json
